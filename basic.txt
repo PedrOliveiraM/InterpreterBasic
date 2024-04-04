@@ -1,4 +1,6 @@
-10 A -> 1 : B = 2 : C = 3 : age = 22
-20 C = A + B
-30 PRINT C
-40 
+10 PRINT "ola mundo"
+11 INPUT  A: PRINT A
+12B = 55 : C=10
+1i PRINT "COMENTARIO"
+13 soma = B+C
+14 PRINT soma

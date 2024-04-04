@@ -1,0 +1,4 @@
+10 INPUT  A: PRINTA
+11 B = 55 : C=10
+13 soma = B + C
+15 PRINT soma
