@@ -1,14 +1,17 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <lexer.h>
 #include <sstream>
 #include <string>
 #include <vector>
 #include <map>
+// minhas libs
+#include <lexer.h>
+#include <parser.h>
 using namespace std;
 
 Lexer lexer;
+Parser parser;
 map<int, vector<string>> tokens;
 
 
@@ -16,6 +19,8 @@ map<int, vector<string>> tokens;
 
 // MAIN ***************************************************************************************************
 int main() {
+
+    string saida = "";
     ifstream file("C:/Users/pedro.monteiro/Documents/InterpreterBasic/basic.txt");
     if (!file.is_open()) {
         cerr << "Erro ao abrir o arquivo." << endl;
@@ -26,19 +31,16 @@ int main() {
     while (getline(file, linha)) {
         cout << linha << endl; // mostrar linha de entrada
         linha = lexer.standardize(linha);
-        cout << linha << endl; // mostrar linha apos a padronização
+
+        saida += linha + "\n";
         tokens = lexer.tokenize(linha,tokens);
     }
 
-    lexer.showMap(tokens);
+    parser.verStruct(tokens);
 
-    //mostrar
-    cout<<"\nACESSANDO TOKEN ESPECIFICIO: \n";
-    cout<<"tamanho: "<<tokens[14].size();
 
-    std::string token = tokens[14][1];
-    cout<<"\nToken: " << token<<endl;
-
+    cout<<"\n-----* SAIDA *------\n";
+    cout<<saida<<endl;;
 
     file.close();
     return 0;

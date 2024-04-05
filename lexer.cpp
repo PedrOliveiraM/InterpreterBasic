@@ -1,13 +1,19 @@
 #include "lexer.h"
-
+#include <unordered_set>
 Lexer::Lexer() {
 
 }
-
-string Lexer::standardize(string linha)
-{
+string Lexer::standardize(string linha) {
     size_t pos = 0;
     string simbolos = ":*/-+()=";
+    unordered_set<string> palavras_chave = {"INPUT", "PRINT", "REM", "IF", "THEN", "HALT", "GOTO"};
+
+    // Verifica se o número da linha é um inteiro e coloca espaço após ele
+    pos = linha.find_first_not_of("0123456789"); // Encontra a primeira posição que não é um dígito
+    if (pos != string::npos && pos > 0 && isspace(linha[pos])) {
+        linha.insert(pos, " ");
+    }
+
     for (char simbolo : simbolos) {
         pos = 0;
         while ((pos = linha.find(simbolo, pos)) != string::npos) {
@@ -23,6 +29,32 @@ string Lexer::standardize(string linha)
         }
     }
 
+    // Verifica se há um número de linha seguido de uma letra e coloca espaço entre eles, se necessário
+    pos = 0;
+    while (pos < linha.size()) {
+        if (isdigit(linha[pos])) {
+            size_t next_pos = linha.find_first_not_of("0123456789", pos + 1); // Encontra a primeira posição que não é um dígito após o número
+            if (next_pos != string::npos && next_pos > pos + 1 && isalpha(linha[next_pos])) {
+                linha.insert(next_pos, " ");
+            }
+            pos = next_pos;
+        } else {
+            pos = linha.find_first_of("0123456789", pos + 1); // Encontra a próxima posição que é um dígito
+        }
+    }
+
+    // Adiciona espaço após palavras-chave
+    for (const string& palavra : palavras_chave) {
+        pos = 0;
+        while ((pos = linha.find(palavra, pos)) != string::npos) {
+            size_t next_pos = pos + palavra.size();
+            if (next_pos < linha.size() && !isspace(linha[next_pos])) {
+                linha.insert(next_pos, " ");
+            }
+            pos = next_pos + 1;
+        }
+    }
+
     pos = 0;
     while ((pos = linha.find("  ", pos)) != string::npos) {
         linha.erase(pos + 1, 1);
@@ -31,11 +63,25 @@ string Lexer::standardize(string linha)
     return linha;
 }
 
+
 map<int, vector<string>> Lexer::tokenize(string line, map<int, vector<string>>& tokenizedLines) {
     std::istringstream iss(line);
-    int label;
-    if (!(iss >> label) || !iss.eof()) {
+
+    std::string label_str;
+    if (!(iss >> label_str)) {
         throw std::invalid_argument("Erro na leitura do label");
+    }
+
+    if (!isInteger(label_str))
+        throw std::invalid_argument("Erro na leitura do label " + label_str);
+
+    int label;
+    try {
+        label = stoi(label_str);
+    } catch (const std::invalid_argument& e) {
+        throw std::invalid_argument("Erro na conversão do label para inteiro");
+    } catch (const std::out_of_range& e) {
+        throw std::out_of_range("O label está fora do intervalo válido para int");
     }
 
     std::string token;

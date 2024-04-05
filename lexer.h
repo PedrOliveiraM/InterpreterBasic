@@ -5,6 +5,7 @@
 #include <vector>
 #include <map>
 #include <iostream>
+#include <stdexcept>
 using namespace std;
 class Lexer
 {

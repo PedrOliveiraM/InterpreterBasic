@@ -5,11 +5,13 @@ CONFIG -= qt
 
 SOURCES += \
         lexer.cpp \
-        main.cpp
+        main.cpp \
+        parser.cpp
 
 DISTFILES += \
     backup \
     basic.txt
 
 HEADERS += \
-    lexer.h
+    lexer.h \
+    parser.h
