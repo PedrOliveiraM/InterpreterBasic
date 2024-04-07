@@ -6,6 +6,7 @@
 #include <map>
 #include <iostream>
 #include <stdexcept>
+#include <unordered_map>
 using namespace std;
 class Lexer
 {
@@ -14,8 +15,11 @@ public:
 
     // metodo para padronizar as linhas
     string standardize(string linha);
-    map<int, vector<string>> tokenize(string line, map<int, vector<string>>& tokenizedLines);
-    void showMap(const std::map<int, std::vector<std::string>>& mapa);
+
+    std::vector<std::pair<int, std::vector<std::string>>> tokenize(string line,  std::vector<std::pair<int, std::vector<std::string>>>& tokenizedLines);
+
+    void showMap(const  std::vector<std::pair<int, std::vector<std::string>>>& mapa);
+
     bool isInteger(const std::string &s);
 };
 

@@ -1,19 +1,15 @@
 #include <iostream>
 #include <fstream>
-#include <sstream>
-#include <sstream>
 #include <string>
 #include <vector>
-#include <map>
 // minhas libs
-#include <lexer.h>
-#include <parser.h>
+#include "lexer.h"
+#include "parser.h"
 using namespace std;
 
 Lexer lexer;
 Parser parser;
-map<int, vector<string>> tokens;
-
+std::vector<std::pair<int, std::vector<std::string>>> tokens;
 
 // FUNÇOES ***************************************************************************************************
 
@@ -21,13 +17,17 @@ map<int, vector<string>> tokens;
 int main() {
 
     string saida = "";
-    ifstream file("C:/Users/pedro.monteiro/Documents/InterpreterBasic/basic.txt");
+    string linha;
+
+    ifstream file("C:/compilador/interpreterBasic/basic.txt");
+
     if (!file.is_open()) {
         cerr << "Erro ao abrir o arquivo." << endl;
         return 1;
     }
 
-    string linha;
+    cout<<"\n-----* ENTRADA *------\n";
+
     while (getline(file, linha)) {
         cout << linha << endl; // mostrar linha de entrada
         linha = lexer.standardize(linha);
@@ -36,11 +36,14 @@ int main() {
         tokens = lexer.tokenize(linha,tokens);
     }
 
-    parser.verStruct(tokens);
-
-
     cout<<"\n-----* SAIDA *------\n";
-    cout<<saida<<endl;;
+    cout<<saida<<endl;
+
+    cout<<"\n-----* VER TOKENS *------\n";
+    lexer.showMap(tokens);
+
+    cout<<"\n-----* DIVIDIR COMANDOS *------\n";
+    parser.verificarComandos(tokens);
 
     file.close();
     return 0;

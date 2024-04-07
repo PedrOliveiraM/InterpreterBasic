@@ -6,7 +6,8 @@ CONFIG -= qt
 SOURCES += \
         lexer.cpp \
         main.cpp \
-        parser.cpp
+        parser.cpp \
+        semantic.cpp
 
 DISTFILES += \
     backup \
@@ -14,4 +15,5 @@ DISTFILES += \
 
 HEADERS += \
     lexer.h \
-    parser.h
+    parser.h \
+    semantic.h

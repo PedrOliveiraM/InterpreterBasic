@@ -1,10 +1,5 @@
-10 PRINT "ola mundo"
-11 INPUTA: PRINT A
-12 B = 55 : C=10
-13 PRINT"COMENTARIO"
-14 soma = B+C
-15 PRINTsoma
-16 PRINT OK
-17 INPUT A
-18 PRINT B
-PRINT C
+1 nome = "pedro" : INPUT idade
+2 PRINT "Ola" : PRINT nome
+3 REM "comentario do programa"
+4 PRINT "A soma" : soma = 10
+5 HALT
