@@ -1,8 +1,27 @@
 #include "parser.h"
+map<string, int> Parser::getIntVariables() const
+{
+    return intVariables;
+}
+
+map<string, float> Parser::getFloatVariables() const
+{
+    return floatVariables;
+}
+
+map<string, string> Parser::getStringVariables() const
+{
+    return stringVariables;
+}
+
 Parser::Parser() {
 
 }
 
+Parser::~Parser()
+{
+    // Destrutor vazio
+}
 bool Parser::verificarLabels( std::vector<std::pair<int, std::vector<std::string>>>& tokens)
 {
     try {
@@ -27,13 +46,15 @@ bool Parser::verificarLabels( std::vector<std::pair<int, std::vector<std::string
     return false;
 }
 
-bool Parser::verificarComandos(std::vector<std::pair<int, std::vector<std::string>>> &tokens) {
+std::vector<std::pair<int, std::vector<std::string>>> Parser::verificarComandos(std::vector<std::pair<int, std::vector<std::string>>> &tokens) {
+
+    verificarLabels(tokens);
     for (const auto& tokenPair : tokens) {
         const std::vector<std::string>& tokenList = tokenPair.second;
         std::vector<std::string> comando; // Para armazenar os tokens de cada comando
         for (const auto& token : tokenList) {
             if (token == ":") {
-                // Se encontramos um delimitador de comando, mostramos o comando
+                // Se encontramos um delimitador de comando
                 if (!comando.empty()) {
                     //mostrarComando(comando);
                     identificarComando(comando);
@@ -51,16 +72,19 @@ bool Parser::verificarComandos(std::vector<std::pair<int, std::vector<std::strin
             identificarComando(comando);
         }
     }
-    return true;
+    return criarComandosExecutaveis(tokens);
+    //mostrarVariaveis();
 }
 
 void Parser::mostrarComando(const std::vector<std::string>& comando) {
-    std::cout << "Comando:";
+    //std::cout << "Comando:";
     for (const auto& token : comando) {
         std::cout << " " << token;
     }
     std::cout << std::endl;
 }
+
+
 
 bool Parser::identificarComando(const std::vector<std::string>& comando) {
     if (comando.empty()) {
@@ -88,6 +112,9 @@ bool Parser::identificarComando(const std::vector<std::string>& comando) {
     } else if (primeiroToken == "GOTO") {
         if (!structGOTO(comando))
             throw "Erro na estrutura do comando GOTO";
+    } else if (segundoToken == "=" && comando.size() >= 5) {
+        if (!structARITMETICA(comando))
+            throw "Erro na estrutura do comando ATRIBUIR";
     } else if (segundoToken == "=") {
         if (!structATRIBUICAO(comando))
             throw "Erro na estrutura do comando ATRIBUIR";
@@ -98,7 +125,73 @@ bool Parser::identificarComando(const std::vector<std::string>& comando) {
 }
 
 bool Parser::structATRIBUICAO(const std::vector<std::string>& tokenList) {
+
     std::cout << "# ATRIBUICAO # \n";
+
+    if (tokenList.size() >= 3) {
+        const std::string& operador = tokenList[1];
+        if (operador != "=") {
+            std::cerr << "Erro: Operador de atribuição inválido." << std::endl;
+            return false;
+        }
+
+        const std::string& variavel = tokenList[0];
+
+        std::string valor;
+        for (size_t i = 2; i < tokenList.size(); ++i) {
+            if (tokenList[i] == ":") {
+                std::cerr << "Erro: Atribuição inválida - dois pontos não são permitidos em uma atribuição." << std::endl;
+                return false;
+            }
+            valor += tokenList[i];
+            if (i != tokenList.size() - 1) {
+                valor += " ";
+            }
+        }
+
+        if (valor.front() == '"' && valor.back() == '"') {
+            stringVariables[variavel] = valor;
+        } else {
+            // Verifique se tem ponto decimal, se tiver é float
+            if (valor.find('.') != std::string::npos) {
+                try {
+                    size_t pos;
+                    float floatValue = std::stof(valor, &pos);
+                    if (pos == valor.size()) {
+                        floatVariables[variavel] = floatValue;
+                    } else {
+                        // Caso tenha caracteres extras após o ponto decimal, considere como uma string
+                        stringVariables[variavel] = valor;
+                    }
+                } catch (const std::invalid_argument&) {
+                    // Caso não seja um número float válido, considere como uma string
+                    stringVariables[variavel] = valor;
+                }
+            } else {
+                // Se não tiver ponto decimal, tente converter para inteiro
+                try {
+                    size_t pos;
+                    int intValue = std::stoi(valor, &pos);
+                    if (pos == valor.size()) {
+                        intVariables[variavel] = intValue;
+                    } else {
+                        // Caso tenha caracteres extras após o número, considere como uma string
+                        stringVariables[variavel] = valor;
+                    }
+                } catch (const std::invalid_argument&) {
+                    // Caso não seja um número inteiro válido, considere como uma string
+                    stringVariables[variavel] = valor;
+                }
+            }
+        }
+
+        return true;
+    } else {
+        std::cerr << "Erro: Atribuição inválida." << std::endl;
+        return false;
+    }
+
+    /*std::cout << "# ATRIBUICAO # \n";
     //mostrarComando(tokenList);
 
     if (tokenList.size() >= 3) {
@@ -126,48 +219,256 @@ bool Parser::structATRIBUICAO(const std::vector<std::string>& tokenList) {
     } else {
         std::cerr << "Erro: Atribuição inválida." << std::endl;
         return false;
-    }
+    }*/
+}
+
+bool Parser::structARITMETICA(const vector<string> &tokenList)
+{
+    cout<<"# ARITMETICA #\n";
+
+    //  Verificar a expressao
+    // Separar o nome da variavel [Primeiro Token]
+    // Verificar ser é uma string, começar com letras , sem simbolos , podendo conter numeros.
+
+    // Separar o token de atribuição [Segundo token]
+    // Verificar se é o sinal de =
+
+    // Função para Verificar se o [Token] é :  uma variável, string ou numero.
+    // Função para Verificar se o [Token] é um [Operador]
+
+    // Enquanto houver Tokens FAÇA:
+    // nome da variavel é valido ?
+    // se sim
+    //  proximo token é um token de = ?
+    //      se sim
+    //          proximo token é uma [Var|| string || numero ]  ?
+    //                se sim
+    //                   nome da var = token
+    //                      proximo token é um [operador] ?
+    //                          se sim
+    //                              nome da var = token [operador]
+
+//     cout << "# ARITMETICA #\n";
+
+//     // Verificar se há pelo menos 3 tokens (nome da variável, sinal de igual e pelo menos um valor)
+//     if (tokenList.size() < 3) {
+//         cout << "Erro: Expressão inválida. Esperados pelo menos 3 tokens.\n";
+//         return false;
+//     }
+
+//     // Verificar a validade do nome da variável (primeiro token)
+//     if (!isVariable(tokenList[0])) {
+//         cout << "Erro: Nome da variável inválido.\n";
+//         return false;
+//     }
+
+//     // Verificar se o segundo token é o sinal de atribuição '='
+//     if (tokenList[1] != "=") {
+//         cout << "Erro: Esperado sinal de atribuição '=' após o nome da variável.\n";
+//         return false;
+//     }
+
+//     // Iterar sobre os tokens começando do terceiro token
+//     for (size_t i = 2; i < tokenList.size(); ++i) {
+//         // Verificar se o token atual é um número, variável ou string
+//         if (isNumber(tokenList[i]) || isVariable(tokenList[i]) || isString(tokenList[i])) {
+//             // Implemente o que fazer quando encontrar um número, variável ou string
+//             // Por exemplo, atribuir à variável ou realizar operações com ela
+//             cout << "Token válido: " << tokenList[i] << endl;
+//         } //else if (isOperator(tokenList[i])) {
+//             // Implemente o que fazer quando encontrar um operador
+//             // Por exemplo, realizar a operação aritmética correspondente
+//             cout << "Operador encontrado: " << tokenList[i] << endl;
+//         }// else {
+//             cout << "Erro: Token inválido encontrado: " << tokenList[i] << endl;
+//             return false;
+//         }
+//     }
+
+//     return true;
+// }
+//     return 1;
 }
 
 bool Parser::structPRINT(const vector<string>  &tokenList)
 {
     std::cout << "# PRINT # \n";
+   // mostrarComando(tokenList);
+
+    if (tokenList.size() >= 2) {
+        const std::string& segundoToken = tokenList[1];
+        if (segundoToken.size() >= 2 && segundoToken.front() == '"' && segundoToken.back() == '"') {
+            // O segundo token é uma string entre aspas
+            //std::cout << "STRING: " << segundoToken << std::endl;
+        } else {
+            // O segundo token pode conter espaços e ainda ser uma string entre aspas
+            std::string possivelString;
+            for (size_t i = 1; i < tokenList.size(); ++i) {
+                possivelString += tokenList[i];
+                if (i != tokenList.size() - 1) {
+                    possivelString += " ";
+                }
+            }
+            std::stringstream ss(possivelString);
+            std::string token;
+            if (std::getline(ss, token) && token.front() == '"' && token.back() == '"') {
+                //std::cout << "STRING: " << token << std::endl;
+                return true;
+            } else {
+                // Se não é uma string entre aspas, então é uma variável
+                //std::cout << "VARIAVEL: " << possivelString << std::endl;
+                return true;
+            }
+        }
+    } else {
+        // Não há segundo token
+        std::cerr << "Erro: esperava um argumento!" << std::endl;
+        return false;
+    }
 
     return true;
 }
 
 bool Parser::structINPUT(const vector<string>  &tokenList)
 {
-    cout << "# INPUT # \n";
-    //mostrarComando(tokenList);
+    std::cout << "# INPUT # \n";
+
+    if (tokenList.size() >= 2) {
+        const std::string& segundoToken = tokenList[1];
+        if (!segundoToken.empty() && std::isalpha(segundoToken.front()) && segundoToken.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_") == std::string::npos) {
+            // O segundo token é um nome de variável válido
+            //std::cout << "VALIDO\n";
+        } else {
+            // Segundo token inválido
+            std::cerr << "Erro: Segundo token invalido!" << std::endl;
+            return false;
+        }
+    } else {
+        // Não há segundo token
+        std::cerr << "Erro: Nao ha segundo token!" << std::endl;
+        return false;
+    }
+
     return true;
 }
 
-bool Parser::structREM(const vector<string>  &tokenList)
-{
-    cout << "# REM # \n";
-    //mostrarComando(tokenList);
-    return true;
+bool Parser::structREM(const std::vector<std::string>& tokenList) {
+    std::cout << "# REM # \n";
+
+    if (tokenList.size() >= 2) {
+        const std::string& segundoToken = tokenList[1];
+        if (segundoToken.front() == '"' && segundoToken.back() == '"') {
+            // O segundo token é uma string entre aspas
+            //std::cout << "Comentário válido: " << segundoToken << std::endl;
+            return true;
+        } else {
+            // O segundo token não é uma string entre aspas
+            for (size_t i = 2; i < tokenList.size(); ++i) {
+                if (tokenList[i].front() == '"' && tokenList[i].back() == '"') {
+                    // Verifica se a palavra contém uma string entre aspas
+                    std::cerr << "Erro: Comentário inválido! Palavra contém uma string entre aspas." << std::endl;
+                    return false;
+                }
+            }
+            // Se chegou aqui, indica que nenhuma palavra contém uma string entre aspas
+            //std::cout << "Comentário válido: ";
+            for (const auto& token : tokenList) {
+                //std::cout << token << " ";
+            }
+
+            return true;
+        }
+    } else {
+        // Não há segundo token
+        std::cerr << "Erro: Não há segundo token!" << std::endl;
+        return false;
+    }
 }
+
 
 bool Parser::structGOTO(const vector<string>  &tokenList)
 {
-    cout << "# GOTO # \n";
-    //mostrarComando(tokenList);
+    std::cout << "# GOTO # \n";
+
+    if (tokenList.size() >= 2) {
+        const std::string& segundoToken = tokenList[1];
+        std::stringstream ss(segundoToken);
+        int numero;
+        if (ss >> numero && ss.eof()) {
+            // O segundo token é um número inteiro
+            return true;
+            //std::cout << "O segundo token e um numero inteiro: " << numero << std::endl;
+        } else {
+            // Segundo token não é um número inteiro
+            std::cerr << "Erro: label errada!" << std::endl;
+            return false;
+        }
+    } else {
+        // Não há segundo token
+        std::cerr << "Erro: Nao ha segundo token!" << std::endl;
+        return false;
+    }
+
     return true;
 }
 
 bool Parser::structIF(const vector<string>  &tokenList)
 {
-    cout << "# IF # \n";
-    //mostrarComando(tokenList);
-    return true;
+    std::cout << "# IF #\n";
+
+    if (tokenList.size() >= 6) {
+        const std::string& variavelOuNumero1 = tokenList[1];
+        const std::string& operador = tokenList[2];
+        const std::string& variavelOuNumero2 = tokenList[3];
+        const std::string& then = tokenList[4];
+
+        if (then == "THEN" && tokenList.size() >= 7) {
+            const std::vector<std::string> comandoDepoisDoThen(tokenList.begin() + 5, tokenList.end());
+
+            if (operador == ">" || operador == "<" || operador == "<>" || operador == "=") {
+                if ((isString(variavelOuNumero1) || isVariable(variavelOuNumero1) || isNumber(variavelOuNumero1)) &&
+                    (isString(variavelOuNumero2) || isVariable(variavelOuNumero2) || isNumber(variavelOuNumero2))) {
+                    //std::cout << "Estrutura IF válida" << std::endl;
+                    return true;
+                } else {
+                    std::cerr << "Erro: Operadores com tipos de operandos inválidos!" << std::endl;
+                    return false;
+                }
+            } else {
+                std::cerr << "Erro: Operador inválido!" << std::endl;
+                return false;
+            }
+        } else {
+            std::cerr << "Erro: Estrutura IF inválida! THEN não encontrado ou comando após THEN faltando." << std::endl;
+            return false;
+        }
+    } else {
+        std::cerr << "Erro: Não há tokens suficientes para formar uma instrução IF válida!" << std::endl;
+        return false;
+    }
 }
+
+void Parser::encontrarTokensAposTHEN(const std::vector<string> &tokenList)
+{
+    std::vector<std::string> comando;
+    bool encontrouTHEN = false;
+    for (size_t i = 0; i < tokenList.size(); ++i) {
+        if (encontrouTHEN) {
+            comando.push_back(tokenList[i]);
+        } else if (tokenList[i] == "THEN") {
+            encontrouTHEN = true;
+        }
+    }
+    mostrarComando(comando);
+    identificarComando(comando);
+    //dentificarComando(comando);
+}
+
 
 bool Parser::structHALT(const vector<string> &tokenList)
 {
     cout << "# HALT # \n";
-    //mostrarComando(tokenList);
+    //Parar a Execução
     return true;
 }
 
@@ -212,6 +513,32 @@ std::string Parser::trimQuotes(const std::string& s) {
     return s;
 }
 
+bool Parser::isVariable(const string &str)
+{
+    if (str.empty()) return false;
+    if (!std::isalpha(str.front())) return false;
+    for (char c : str) {
+        if (!std::isalnum(c) && c != '_') return false;
+    }
+    return true;
+}
+
+bool Parser::isNumber(const string &str)
+{
+    if (str.empty()) return false;
+    bool hasDot = false;
+    for (char c : str) {
+        if (!std::isdigit(c)) {
+            if (c == '.' && !hasDot) {
+                hasDot = true;
+            } else {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 string Parser::buscarVariavel(const string &variavel)
 {
 
@@ -242,4 +569,49 @@ void Parser::mostrarVariaveis()
     for (const auto& pair : stringVariables) {
         std::cout << pair.first << " = " << pair.second << std::endl;
     }
+}
+
+
+//  TRANSFORMANDO EM EXE
+void Parser::imprimirComandosExecutaveis(const std::vector<std::pair<int, std::vector<string> > > &comandosExecutaveis)
+{
+    for (const auto& comando : comandosExecutaveis) {
+        std::cout << "[" << comando.first << "] ";
+        for (const auto& token : comando.second) {
+            std::cout << token << " ";
+        }
+        std::cout << std::endl;
+    }
+}
+
+std::vector<std::pair<int, std::vector<string> > > Parser::criarComandosExecutaveis(const std::vector<std::pair<int, std::vector<string> > > &tokens)
+{
+
+    std::vector<std::pair<int, std::vector<std::string>>> comandosExecutaveis;
+    for (const auto& tokenPair : tokens) {
+        const std::vector<std::string>& tokenList = tokenPair.second;
+        std::vector<std::string> comando;
+        for (const auto& token : tokenList) {
+            if (token == ":") {
+                // Se encontramos um delimitador de comando, adicionamos o comando ao vetor de comandos executáveis
+                if (!comando.empty()) {
+                    comandosExecutaveis.push_back({tokenPair.first, comando});
+                    comando.clear();
+                }
+            } else {
+                // Adiciona o token ao comando atual
+                comando.push_back(token);
+            }
+        }
+        // Verifica se há algum comando pendente após o término dos tokens
+        if (!comando.empty()) {
+            comandosExecutaveis.push_back({tokenPair.first, comando});
+        }
+    }
+
+    cout<<"\n-----* EXECUTAVEL *------\n";
+
+    imprimirComandosExecutaveis(comandosExecutaveis);
+    return comandosExecutaveis;
+
 }
