@@ -19,17 +19,18 @@ class Parser
 {
 
 public:
-    std::map<std::string, int> intVariables;
-    std::map<std::string, float> floatVariables;
-    std::map<std::string, std::string> stringVariables;
+    map<string, int> intVariables;
+    map<string, float> floatVariables;
+    map<string, string> stringVariables;
+
+
 
     Parser();
+    ~Parser();
     bool verificarLabels( vector<pair<int, vector<string>>>& tokens);
-    bool verificarComandos(std::vector<std::pair<int, std::vector<std::string>>> &tokens);
-    bool identificarComando(const std::vector<std::string>& comando);
-    void mostrarComando(const std::vector<std::string>& comando);
-
-
+    vector<pair<int, vector<string>>> verificarComandos(vector<pair<int, vector<string>>> &tokens);
+    bool identificarComando(const vector<string>& comando);
+    void mostrarComando(const vector<string>& comando);
 
     // VERIFICAR STRUTURAS:
     bool structPRINT(const vector<string> & tokenList);
@@ -37,22 +38,32 @@ public:
     bool structREM(const vector<string> & tokenList);
     bool structGOTO(const vector<string> & tokenList);
     bool structIF(const vector<string> & tokenList);
+    void encontrarTokensAposTHEN(const vector<string>& tokenList);
     bool structHALT(const vector<string> & tokenList);
     bool structATRIBUICAO(const vector<string> & tokenList);
-
+    void extracted(const vector<string> &tokenList);
+    bool structARITMETICA(const vector<string> &tokenList);
 
     // PARA VARIAVEIS
-    void armazenarValor(const std::string& variavel, const std::string& valor);
-    bool isString(const std::string& valor);
-    bool isInt(const std::string& valor);
-    bool isFloat(const std::string& valor);
-    string trimQuotes(const std::string& valor);
+    void armazenarValor(const string& variavel, const string& valor);
+    bool isString(const string& valor);
+    bool isInt(const string& valor);
+    bool isFloat(const string& valor);
+    string trimQuotes(const string& valor);
+    bool isVariable(const string& str);
+    bool isNumber(const string& str);
 
     // metodos para variaveis
-    string buscarVariavel(const std::string& variavel);
+    string buscarVariavel(const string& variavel);
     void mostrarVariaveis();
 
+    // EXECUTAVEIS
+    void imprimirComandosExecutaveis(const vector<pair<int, vector<string>>>& comandosExecutaveis);
+    vector<pair<int, vector<string>>> criarComandosExecutaveis(const vector<pair<int, vector<string>>>& tokens);
 
+    map<string, int> getIntVariables() const;
+    map<string, float> getFloatVariables() const;
+    map<string, string> getStringVariables() const;
 };
 
 #endif // PARSER_H

@@ -1,5 +1,13 @@
-1 nome = "pedro" : INPUT idade
-2 PRINT "Ola" : PRINT nome
-3 REM "comentario do programa"
-4 PRINT "A soma" : soma = 10
-5 HALT
+10 REM "CODIGO BASIC"
+20 PRINT "CODIGO BASIC"
+30 PRINT "INFORME UM NUMERO"
+40 INPUT num1
+50 PRINT "INFORME OUTRO NUMERO" : INPUT num2
+60 IF num1 > num2 THEN GOTO 80
+70 GOTO 100
+80 PRINT "numero 1 maior"
+90 GOTO 110
+100 PRINT "numero 2 maior"
+110 PRINT "HELLO WORLD"
+112 PRINT total
+120 HALT

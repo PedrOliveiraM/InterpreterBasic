@@ -5,17 +5,17 @@
 // minhas libs
 #include "lexer.h"
 #include "parser.h"
+#include "Semantic.h"
+
 using namespace std;
 
 Lexer lexer;
-Parser parser;
-std::vector<std::pair<int, std::vector<std::string>>> tokens;
+Parser *parser = new Parser;
+Semantic *semantic = new Semantic;
+vector<pair<int, vector<string>>> tokens;
+vector<pair<int, vector<string>>> executaveis;
 
-// FUNÇOES ***************************************************************************************************
-
-// MAIN ***************************************************************************************************
 int main() {
-
     string saida = "";
     string linha;
 
@@ -35,7 +35,7 @@ int main() {
         saida += linha + "\n";
         tokens = lexer.tokenize(linha,tokens);
     }
-
+    cout <<"SAIU D0 WHILE";
     cout<<"\n-----* SAIDA *------\n";
     cout<<saida<<endl;
 
@@ -43,10 +43,17 @@ int main() {
     lexer.showMap(tokens);
 
     cout<<"\n-----* DIVIDIR COMANDOS *------\n";
-    parser.verificarComandos(tokens);
+    // Adicione esta linha para criar um objeto Parser
+    executaveis = parser->verificarComandos(tokens);
+
+    cout<<"\n-----* VENDO AS VARIAVEIS *------\n";
+    parser->mostrarVariaveis();
+
+    cout<<"\n-----* EXECUTANDO *------\n";
+    //semantic->armazenarVars(parser->getIntVariables(),parser->getFloatVariables(),parser->getStringVariables());
+    semantic->interpretador(executaveis);
+    //semantic->mostrarVariaveis();
 
     file.close();
     return 0;
 }
-
-

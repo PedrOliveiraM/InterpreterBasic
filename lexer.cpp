@@ -80,6 +80,7 @@ string Lexer::standardize(std::string linha) {
 
 std::vector<std::pair<int, std::vector<std::string>>> Lexer::tokenize(std::string line, std::vector<std::pair<int, std::vector<std::string>>>& tokenizedLines) {
 
+    cout <<"entrou tokenize\n";
     std::istringstream iss(line);
 
     std::string label_str;
@@ -107,10 +108,9 @@ std::vector<std::pair<int, std::vector<std::string>>> Lexer::tokenize(std::strin
 
     tokenizedLines.push_back(std::make_pair(label, tokens));
 
+    cout <<"SAIU\n";
     return tokenizedLines;
 }
-
-
 
 
 void Lexer::showMap(const std::vector<std::pair<int, std::vector<std::string>>> &mapa)

@@ -258,19 +258,19 @@ int Semantic::execIF(const std::vector<string> &comando,int proximaLinha)
     valor = converterParaTipo(valor);
 
     // Realiza a comparação
-    bool condicao = verificarComparacao(valorVar1,valor,operador);
-    // if (operador == ">") {
-    //     condicao = stof(valorVar1) > stof(valor);
-    // } else if (operador == "<") {
-    //     condicao = stof(valorVar1) < stof(valor);
-    // } else if (operador == "=") {
-    //     condicao = stof(valorVar1) == stof(valor);
-    // } else if (operador == "<>") {
-    //     condicao = stof(valorVar1) != stof(valor);
-    // } else {
-    //     cerr << "Erro: Operador inválido: " << operador << endl;
-    //     return false;
-    // }
+    bool condicao;
+    if (operador == ">") {
+        condicao = stof(valorVar1) > stof(valor);
+    } else if (operador == "<") {
+        condicao = stof(valorVar1) < stof(valor);
+    } else if (operador == "=") {
+        condicao = stof(valorVar1) == stof(valor);
+    } else if (operador == "<>") {
+        condicao = stof(valorVar1) != stof(valor);
+    } else {
+        cerr << "Erro: Operador inválido: " << operador << endl;
+        return false;
+    }
 
     //cout<<"CONDI: "<<condicao<<endl;
     // Executa o comando correspondente à condição
@@ -540,19 +540,3 @@ void Semantic::mostrarVariaveis()
         std::cout << pair.first << " = " << pair.second << std::endl;
     }
 }
-
-template<typename T, typename T2>
-bool Semantic::verificarComparacao(const T &var, const T2 &var2, string op)
-{
-    if (op == "=")
-        return var == var2;
-    else if (op == ">")
-        return var > var2;
-    else if (op == "<")
-        return var < var2;
-    else if (op == "<>")
-        return var != var2;
-    else
-        std::cerr<<"Erro na expressao boleana\n";
-}
-

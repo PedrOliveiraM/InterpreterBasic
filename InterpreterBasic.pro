@@ -10,8 +10,8 @@ SOURCES += \
         semantic.cpp
 
 DISTFILES += \
-    backup \
-    basic.txt
+    basic.txt \
+    semanticCPP
 
 HEADERS += \
     lexer.h \
