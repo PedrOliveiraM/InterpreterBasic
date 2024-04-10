@@ -1,0 +1,14 @@
+10 REM "CODIGO BASIC"
+20 PRINT "Codigo para Verificar quem e o maior numero"
+25 PRINT "Qual seu nome?" : INPUT nome
+26 PRINT "Ola," : PRINT nome
+30 PRINT "INFORME UM NUMERO"
+40 INPUT num1
+50 PRINT "INFORME OUTRO NUMERO" : INPUT num2
+60 IF num1 > num2 THEN GOTO 80
+70 GOTO 101
+80 PRINT "O numero 1 maior"
+90 GOTO 110
+101 PRINT "O numero 2 maior"
+110 PRINT "Isso e tudo pessoal"
+120 HALT

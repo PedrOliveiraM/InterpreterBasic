@@ -91,7 +91,6 @@ bool Parser::identificarComando(const std::vector<std::string>& comando) {
         std::cerr << "Erro: Comando vazio!" << std::endl;
         return false;
     }
-
     const std::string& primeiroToken = comando[0];
     const std::string& segundoToken = comando[1];
     if (primeiroToken == "PRINT") {
@@ -114,7 +113,7 @@ bool Parser::identificarComando(const std::vector<std::string>& comando) {
             throw "Erro na estrutura do comando GOTO";
     } else if (segundoToken == "=" && comando.size() >= 5) {
         if (!structARITMETICA(comando))
-            throw "Erro na estrutura do comando ATRIBUIR";
+            throw "Erro na estrutura do comando OPE ARIT";
     } else if (segundoToken == "=") {
         if (!structATRIBUICAO(comando))
             throw "Erro na estrutura do comando ATRIBUIR";
@@ -190,104 +189,52 @@ bool Parser::structATRIBUICAO(const std::vector<std::string>& tokenList) {
         std::cerr << "Erro: Atribuição inválida." << std::endl;
         return false;
     }
-
-    /*std::cout << "# ATRIBUICAO # \n";
-    //mostrarComando(tokenList);
-
-    if (tokenList.size() >= 3) {
-        const std::string& operador = tokenList[1];
-        if (operador != "=") {
-            std::cerr << "Erro: Operador de atribuição inválido." << std::endl;
-            return false;
-        }
-
-        const std::string& variavel = tokenList[0];
-
-        std::string valor;
-        for (size_t i = 2; i < tokenList.size(); ++i) {
-            if (tokenList[i] == ":") {
-                std::cerr << "Erro: Atribuição inválida - dois pontos não são permitidos em uma atribuição." << std::endl;
-                return false;
-            }
-            valor += tokenList[i];
-            if (i != tokenList.size() - 1) {
-                valor += " ";
-            }
-        }
-
-        return true;
-    } else {
-        std::cerr << "Erro: Atribuição inválida." << std::endl;
-        return false;
-    }*/
 }
 
 bool Parser::structARITMETICA(const vector<string> &tokenList)
 {
     cout<<"# ARITMETICA #\n";
 
-    //  Verificar a expressao
-    // Separar o nome da variavel [Primeiro Token]
-    // Verificar ser é uma string, começar com letras , sem simbolos , podendo conter numeros.
+    // Verifica se há pelo menos três tokens (nome da variável, sinal de atribuição, valor)
+    if (tokenList.size() < 3) {
+        cerr << "Erro: Expressão incompleta." << endl;
+        return false;
+    }
 
-    // Separar o token de atribuição [Segundo token]
-    // Verificar se é o sinal de =
+    // Extrai os tokens
+    const string& nomeVariavel = tokenList[0];
+    const string& sinalAtribuicao = tokenList[1];
+    const string& valor = tokenList[2];
+    int cont = 0;
 
-    // Função para Verificar se o [Token] é :  uma variável, string ou numero.
-    // Função para Verificar se o [Token] é um [Operador]
 
-    // Enquanto houver Tokens FAÇA:
-    // nome da variavel é valido ?
-    // se sim
-    //  proximo token é um token de = ?
-    //      se sim
-    //          proximo token é uma [Var|| string || numero ]  ?
-    //                se sim
-    //                   nome da var = token
-    //                      proximo token é um [operador] ?
-    //                          se sim
-    //                              nome da var = token [operador]
+    for (int pos = 2; pos < tokenList.size(); pos++) {
+        cout<<tokenList[pos]<<" ";
 
-//     cout << "# ARITMETICA #\n";
+        if (pos == tokenList.size()-1){
+            if(isOperator(tokenList[pos]))
+                throw invalid_argument("Esta faltando argumento");
+        }
 
-//     // Verificar se há pelo menos 3 tokens (nome da variável, sinal de igual e pelo menos um valor)
-//     if (tokenList.size() < 3) {
-//         cout << "Erro: Expressão inválida. Esperados pelo menos 3 tokens.\n";
-//         return false;
-//     }
+        if (cont == 0){
+            if(isVariable(tokenList[pos]) || isNumber(tokenList[pos]) || isString(tokenList[pos]))
+                cout<<"E variavel"<<endl;
+            else
+                //throw
+                throw invalid_argument("Token nao e uma variavel.");
 
-//     // Verificar a validade do nome da variável (primeiro token)
-//     if (!isVariable(tokenList[0])) {
-//         cout << "Erro: Nome da variável inválido.\n";
-//         return false;
-//     }
+            cont = 1;
+        }else{
+            if(isOperator(tokenList[pos]))
+                cout<<"E operador"<<endl;
+            else
+                //throw
+                throw invalid_argument("Token nao e um operador.");
 
-//     // Verificar se o segundo token é o sinal de atribuição '='
-//     if (tokenList[1] != "=") {
-//         cout << "Erro: Esperado sinal de atribuição '=' após o nome da variável.\n";
-//         return false;
-//     }
-
-//     // Iterar sobre os tokens começando do terceiro token
-//     for (size_t i = 2; i < tokenList.size(); ++i) {
-//         // Verificar se o token atual é um número, variável ou string
-//         if (isNumber(tokenList[i]) || isVariable(tokenList[i]) || isString(tokenList[i])) {
-//             // Implemente o que fazer quando encontrar um número, variável ou string
-//             // Por exemplo, atribuir à variável ou realizar operações com ela
-//             cout << "Token válido: " << tokenList[i] << endl;
-//         } //else if (isOperator(tokenList[i])) {
-//             // Implemente o que fazer quando encontrar um operador
-//             // Por exemplo, realizar a operação aritmética correspondente
-//             cout << "Operador encontrado: " << tokenList[i] << endl;
-//         }// else {
-//             cout << "Erro: Token inválido encontrado: " << tokenList[i] << endl;
-//             return false;
-//         }
-//     }
-
-//     return true;
-// }
-//     return 1;
+            cont = 0;
+        }
+    }
+    return true;
 }
 
 bool Parser::structPRINT(const vector<string>  &tokenList)
@@ -521,6 +468,12 @@ bool Parser::isVariable(const string &str)
         if (!std::isalnum(c) && c != '_') return false;
     }
     return true;
+}
+
+bool Parser::isOperator(const string &str)
+{
+    static const std::unordered_set<std::string> operators = {"+", "-", "*", "/"};
+    return operators.find(str) != operators.end();
 }
 
 bool Parser::isNumber(const string &str)

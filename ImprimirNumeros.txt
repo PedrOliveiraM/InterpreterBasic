@@ -1,0 +1,9 @@
+10 REM "imprimir a sequencia ate N"
+20 PRINT "Imprima N numeros"
+30 PRINT "Digite um numero: ": INPUT n
+35 cont = 0
+40 IF cont < n THEN GOTO 60
+50 GOTO 70
+55 PRINT n : cont = cont + 1
+60 GOTO 40
+70 HALT

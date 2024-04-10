@@ -1,0 +1,9 @@
+10 PRINT "Teste Concatenacao"
+20 REM "@pedro"
+30 nomeCompleto = "pedro" +"de"+ "teixeria"
+40 PRINT "Bem vindo" : PRINT nomeCompleto
+45 HALT
+
+
+
+// trttttt

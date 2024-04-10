@@ -18,8 +18,16 @@ vector<pair<int, vector<string>>> executaveis;
 int main() {
     string saida = "";
     string linha;
+    string caminhoDoarquivo = "C:/Users/pedro.monteiro/Documents/gits/InterpreterBasic/";
+    string arquivo;
 
-    ifstream file("C:/compilador/interpreterBasic/basic.txt");
+    //arquivo = "ImprimirNumeros.txt";
+    //arquivo = "NumMaior.txt";
+    arquivo = "OperacaoArit.txt";
+    arquivo = "Media.txt";
+
+    ifstream file(caminhoDoarquivo + arquivo);
+
 
     if (!file.is_open()) {
         cerr << "Erro ao abrir o arquivo." << endl;
@@ -29,13 +37,14 @@ int main() {
     cout<<"\n-----* ENTRADA *------\n";
 
     while (getline(file, linha)) {
-        cout << linha << endl; // mostrar linha de entrada
+       cout << linha << endl; // mostrar linha de entrada
         linha = lexer.standardize(linha);
 
         saida += linha + "\n";
         tokens = lexer.tokenize(linha,tokens);
     }
-    cout <<"SAIU D0 WHILE";
+
+    cout <<"SAIwU D0 WHILE";
     cout<<"\n-----* SAIDA *------\n";
     cout<<saida<<endl;
 
@@ -54,6 +63,13 @@ int main() {
     semantic->interpretador(executaveis);
     //semantic->mostrarVariaveis();
 
+
+
+    //vector<string> tokenList = {"bask", "=", "3", "*", "3", "*","xereca"};
+    //parser->structARITMETICA(tokenList);
+
     file.close();
+
+
     return 0;
 }

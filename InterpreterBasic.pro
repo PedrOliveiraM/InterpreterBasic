@@ -10,8 +10,10 @@ SOURCES += \
         semantic.cpp
 
 DISTFILES += \
-    basic.txt \
-    semanticCPP
+    ImprimirNumeros.txt \
+    Media.txt \
+    NumMaior.txt \
+    OperacaoArit.txt
 
 HEADERS += \
     lexer.h \

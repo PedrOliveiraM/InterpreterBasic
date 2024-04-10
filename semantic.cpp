@@ -3,7 +3,8 @@ Semantic::Semantic() {
 
 }
 
-void Semantic::interpretador(std::vector<std::pair<int, std::vector<std::string>>> executaveis) {
+void Semantic::interpretador(vector<pair<int, vector<string> > > executaveis)
+{
     std::cout << "\n-----* RESULTADO *------\n";
 
     // 1) Mapeia a ordem de execução com as labels
@@ -57,6 +58,51 @@ void Semantic::interpretador(std::vector<std::pair<int, std::vector<std::string>
     }
 }
 
+bool Semantic::identificarComando(const std::vector<string> &comando, int proximaLinha)
+{
+    if (comando.empty()) {
+        std::cerr << "Erro: Comando vazio" << std::endl;
+        return false;
+    }
+
+    // cout<<" #COMANDO"<<endl;
+    // for (const string &tokens : comando) {
+    //     cout<<tokens<<" ";
+    // }
+    // cout<<endl;
+
+    const std::string& primeiroToken = comando[0];
+    const std::string& segundoToken = comando[1];
+
+    if (primeiroToken == "PRINT") {
+        if (!execPRINT(comando))
+            return false;
+    } else if (primeiroToken == "INPUT") {
+        if (!execINPUT(comando))
+            return false;
+    } else if (primeiroToken == "HALT") {
+        if (!execHALT(comando))
+            return false;
+    } else if (primeiroToken == "IF") {
+        if (!execIF(comando,proximaLinha))
+            return false;
+    } else if (primeiroToken == "REM") {
+        if (!execREM(comando))
+            return false;
+    } else if (primeiroToken == "GOTO") {
+        execGOTO(comando, proximaLinha);
+    } else if (segundoToken == "=" && comando.size() >= 5) {
+        if (!execARITMETIC(comando))
+            throw "Erro na estrutura do comando OPE ARIT";
+    }else if (segundoToken == "="){
+        if (!execATB(comando))
+            return false;
+    } else {
+        std::cerr << "Erro: Comando desconhecido!" << std::endl;
+        return false;
+    }
+    return true;
+}
 
 
 bool Semantic::verificarGOTO(std::vector<std::string>& comando, int& proximaLinha, const std::vector<int>& ordemDeExecucao) {
@@ -93,42 +139,6 @@ bool Semantic::verificarIF(std::vector<std::string>& comando, int& proximaLinha,
     return false;
 }
 
-bool Semantic::identificarComando(const std::vector<string>& comando, int proximaLinha)
-{
-    if (comando.empty()) {
-        std::cerr << "Erro: Comando vazio" << std::endl;
-        return false;
-    }
-    const std::string& primeiroToken = comando[0];
-    const std::string& segundoToken = comando[1];
-
-    if (primeiroToken == "PRINT") {
-        if (!execPRINT(comando))
-            return false;
-    } else if (primeiroToken == "INPUT") {
-        if (!execINPUT(comando))
-            return false;
-    } else if (primeiroToken == "HALT") {
-        if (!execHALT(comando))
-            return false;
-    } else if (primeiroToken == "IF") {
-        if (!execIF(comando,proximaLinha))
-            return false;
-    } else if (primeiroToken == "REM") {
-        if (!execREM(comando))
-            return false;
-    } else if (primeiroToken == "GOTO") {
-        execGOTO(comando, proximaLinha);
-    }else if (segundoToken == "="){
-        if (!execATB(comando))
-            return false;
-    } else {
-        std::cerr << "Erro: Comando desconhecido!" << std::endl;
-        return false;
-    }
-    return true;
-}
-
 bool Semantic::execPRINT(const std::vector<string> &comando)
 {
     if (comando.size() < 2) {
@@ -162,9 +172,16 @@ bool Semantic::execPRINT(const std::vector<string> &comando)
             //cout<<"e UMA VAR: ";
             // Se não estiver delimitado por aspas, imprime o próprio token
             if (verificaToken(token))
-                if (existeVariavel(token))
-                    std::cout << buscarVariavel(token) << " ";
-                else
+                if (existeVariavel(token)){
+                    std::string textoSemAspas;
+                    std::string texto = buscarVariavel(token).second;
+                    for (char c : texto) {
+                        if (c != '\"') { // Verifica se o caractere não é uma aspas
+                            textoSemAspas += c;
+                        }
+                    }
+                    cout<<textoSemAspas;
+                }else
                     cout<<"0";
             else
                 return true;
@@ -251,29 +268,15 @@ int Semantic::execIF(const std::vector<string> &comando,int proximaLinha)
     }
 
     // Obtém o valor da variável 1
-    string valorVar1 = buscarVariavel(variavel1);
-    valor = buscarVariavel(valor);
+    string valorVar1 = buscarVariavel(variavel1).second;
+    valor = buscarVariavel(valor).second;
     // Converte o valorVar1 para o tipo apropriado (int, float ou mantém como string)
     valorVar1 = converterParaTipo(valorVar1);
     valor = converterParaTipo(valor);
 
     // Realiza a comparação
     bool condicao = verificarComparacao(valorVar1,valor,operador);
-    // if (operador == ">") {
-    //     condicao = stof(valorVar1) > stof(valor);
-    // } else if (operador == "<") {
-    //     condicao = stof(valorVar1) < stof(valor);
-    // } else if (operador == "=") {
-    //     condicao = stof(valorVar1) == stof(valor);
-    // } else if (operador == "<>") {
-    //     condicao = stof(valorVar1) != stof(valor);
-    // } else {
-    //     cerr << "Erro: Operador inválido: " << operador << endl;
-    //     return false;
-    // }
 
-    //cout<<"CONDI: "<<condicao<<endl;
-    // Executa o comando correspondente à condição
     if (condicao) {
         if (thenCommand.front() == "GOTO") {
             try {
@@ -283,13 +286,14 @@ int Semantic::execIF(const std::vector<string> &comando,int proximaLinha)
                 return 0;
             }
         }else{
-            identificarComando(thenCommand,1);
+            //identificarComando(thenCommand,1);
+            return 0;
         }
     }
     return 0;
 }
 
-    int Semantic::execGOTO(const std::vector<string> &comando, int label)
+int Semantic::execGOTO(const std::vector<string> &comando, int label)
 {
     if (comando.size() < 2) {
         std::cerr << "Erro: Comando GOTO incompleto" << std::endl;
@@ -380,6 +384,221 @@ bool Semantic::execATB(const vector<string> &tokenList)
     }
 }
 
+bool Semantic::execARITMETIC(const vector<string> &tokenList)
+{
+
+    // Verifica se há pelo menos três tokens
+    if (tokenList.size() < 3) {
+        std::cerr << "Erro: Expressão incompleta." << std::endl;
+        return false;
+    }
+
+    // Extrai os tokens
+    const std::string& nomeVariavel = tokenList[0];
+    const std::string& sinalAtribuicao = tokenList[1];
+    std::string concatString = "";
+    float resultFloat = 0.0;
+
+
+    if (verificarTiposString(tokenList)){
+        //sefor verdadeiro é pq todos sãos string e é para concatenar
+        // Realiza a concatenação das strings a partir do terceiro token
+        for (size_t i = 2; i < tokenList.size(); i++) {
+            if (isString(tokenList[i])){
+                concatString = operacaoString(concatString,tokenList[i],"+");
+            }
+        }
+        // Atualiza ou cria a variável com a string concatenada
+        if (existeVariavel(nomeVariavel)) {
+            modificarVariavel(nomeVariavel, concatString);
+        } else {
+            criarVariavel(nomeVariavel, concatString);
+        }
+    }else if (verificarTiposNumber(tokenList)){
+        cout <<"sao todos numero"<<endl;
+        //sefor verdadeiro é pq todos sãos numeros e é um operação valida
+        for (size_t i = 2; i < tokenList.size(); i++) {
+            cout <<"token"<<tokenList[i]<<endl;
+            if (isNumber(tokenList[i])){
+                cout <<"resultFloat "<<to_string(resultFloat)<<" | "<<tokenList[i] <<" | "<<tokenList[i+1]<<endl;
+                resultFloat = operacaoFloat(to_string(resultFloat),tokenList[i],tokenList[i+1]);
+            }
+        }
+        // Atualiza ou cria a variável com a string concatenada
+        if (existeVariavel(nomeVariavel)) {
+            modificarVariavel(nomeVariavel, to_string(resultFloat));
+        } else {
+            criarVariavel(nomeVariavel, to_string(resultFloat));
+        }
+    }else{
+        // os valores tem variaveis
+        // verificar tipo e variavel
+        //
+    }
+
+    return true;
+}
+
+bool Semantic::verificarTiposNumber(const vector<string> &tokenList)
+{
+    bool status;
+    for (size_t i = 2; i < tokenList.size(); i++) {
+        if (i % 2 == 0){ // VALOR
+            if (isNumber(tokenList[i])){
+                status = true;
+            }else{
+                status = false;
+            }
+        }else{
+            if(tokenList[i] == "+"){
+                status = true;
+            }else{
+                status = false;
+            }
+        }
+    }
+    return status;
+}
+
+bool Semantic::verificarTiposString(const vector<string> &tokenList)
+{
+    bool status;
+    for (size_t i = 2; i < tokenList.size(); i++) {
+        if (i % 2 == 0){ // VALOR
+            if (isString(tokenList[i])){
+                status = true;
+            }else{
+                status = false;
+            }
+        }else{
+            if(tokenList[i] == "+"){
+                status = true;
+            }else{
+                status = false;
+            }
+        }
+    }
+    return status;
+}
+
+
+
+
+bool Semantic::isString(const string &valor)
+{
+    return (!valor.empty() && valor.front() == '"' && valor.back() == '"');
+}
+
+bool Semantic::isVariable(const string &str)
+{
+    if (str.empty()) return false;
+    if (!std::isalpha(str.front())) return false;
+    for (char c : str) {
+        if (!std::isalnum(c) && c != '_') return false;
+    }
+    return true;
+}
+
+bool Semantic::isOperator(const string &str)
+{
+    static const std::unordered_set<std::string> operators = {"+", "-", "*", "/"};
+    return operators.find(str) != operators.end();
+}
+
+bool Semantic::isNumber(const string &str)
+{
+    if (str.empty()) return false;
+    bool hasDot = false;
+    for (char c : str) {
+        if (!std::isdigit(c)) {
+            if (c == '.' && !hasDot) {
+                hasDot = true;
+            } else {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+bool Semantic::isFloat(const string &valor)
+{
+    std::istringstream iss(valor);
+    float f;
+    iss >> std::noskipws >> f;
+    return iss.eof() && !iss.fail();
+}
+
+float Semantic::operacaoFloat(const string &var1, const string &var2, const string &op)
+{
+    float variavel1 = stof(var1);
+    float variavel2 = stof(var2);
+
+    float result = 0.0;
+
+    if (op == "+"){
+        result = variavel1 + variavel2;
+    }else if (op == "-"){
+        result = variavel1 - variavel2;
+    }else if (op == "/"){
+        if (variavel1 == 0 || variavel2 == 0 )
+            result = 0;
+        else
+            result = variavel1 / variavel2;
+    }else if (op == "*"){
+        result = variavel1 * variavel2;
+    }else{
+        result = 0.0;
+    }
+
+    return result;
+}
+
+int Semantic::operacaoInt(const string &var1, const string &var2, const string &op)
+{
+    int variavel1 = stof(var1);
+    int variavel2 = stof(var2);
+
+    int result = 0;
+
+    if (op == "+"){
+        result = variavel1 + variavel2;
+    }else if (op == "-"){
+        result = variavel1 - variavel2;
+    }else if (op == "/"){
+        if (variavel1 == 0 || variavel2 == 0 )
+            result = 0;
+        else
+            result = variavel1 / variavel2;
+    }else if (op == "*"){
+        result = variavel1 * variavel2;
+    }else{
+        result = 0;
+    }
+
+    return result;
+}
+
+string Semantic::operacaoString(const string &var1, const string &var2, const string &op)
+{
+    string variavel1 = var1;
+    string variavel2 = var2;
+
+    //cout<<"@variavel1"<< variavel1 <<endl;
+    //cout<<"@variavel2"<< variavel2 <<endl;
+
+    string result = "";
+    variavel1 += " ";
+
+    if (op != "+")
+        return "ERRO AO CONCATENAR";
+    else
+        result += variavel1 + variavel2;
+
+    //cout<<"@result: " << result <<endl;
+    return result;
+}
+
 void Semantic::armazenarVars(map<string, int> intVariablesExt, map<string, float> floatVariablesExt, map<string, string> stringVariablesExt)
 {
     intVariables = intVariablesExt;
@@ -388,16 +607,16 @@ void Semantic::armazenarVars(map<string, int> intVariablesExt, map<string, float
 }
 
 
-string Semantic::buscarVariavel(const string &variavel)
+std::pair<std::string, std::string> Semantic::buscarVariavel(const std::string &variavel)
 {
     if (intVariables.count(variavel) > 0) {
-        return std::to_string(intVariables[variavel]);
+        return std::make_pair("int", std::to_string(intVariables[variavel]));
     } else if (floatVariables.count(variavel) > 0) {
-        return std::to_string(floatVariables[variavel]);
+        return std::make_pair("float", std::to_string(floatVariables[variavel]));
     } else if (stringVariables.count(variavel) > 0) {
-        return stringVariables[variavel];
+        return std::make_pair("string", stringVariables[variavel]);
     } else {
-        return "0";
+        return std::make_pair("0", ""); // Retornar um par de strings vazias se não for encontrada a variável
     }
 }
 
@@ -554,5 +773,8 @@ bool Semantic::verificarComparacao(const T &var, const T2 &var2, string op)
         return var != var2;
     else
         std::cerr<<"Erro na expressao boleana\n";
+
+    return false;
 }
+
 

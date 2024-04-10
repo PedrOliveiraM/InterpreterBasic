@@ -51,6 +51,7 @@ public:
     bool isFloat(const string& valor);
     string trimQuotes(const string& valor);
     bool isVariable(const string& str);
+    bool isOperator(const string& str);
     bool isNumber(const string& str);
 
     // metodos para variaveis
